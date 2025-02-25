@@ -30,6 +30,7 @@ jobs:
     needs: [format]
     with:
       REGISTRY: ghcr.io
+      DOCKER_CONTEXT: app
       IMAGE: ${{ github.repository }}
       USERNAME: ${{ github.actor }}
     secrets:

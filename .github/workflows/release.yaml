@@ -10,6 +10,7 @@ jobs:
     uses: naviteq/github-actions/.github/workflows/docker-build.yaml@main
     with:
       REGISTRY: ghcr.io
+      DOCKER_CONTEXT: app
       IMAGE: ${{ github.repository }}
       USERNAME: ${{ github.actor }}
     secrets:
