@@ -22,6 +22,7 @@ def read_k8s_directory(dir_path):
                     content = f.read()
                 k8s_info[relative_path] = content
             except Exception as e:
+                # TODO: Remove it after testing
                 k8s_info[relative_path] = f"<Error reading file: {e}>"
     return k8s_info
 
