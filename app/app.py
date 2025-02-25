@@ -71,13 +71,14 @@ def read_k8s_directory(dir_path="/etc/k8s"):
     for root, dirs, files in os.walk(dir_path):
         for filename in files:
             full_path = os.path.join(root, filename)
+            base_name = os.path.basename(full_path)
             # Relative path (e.g., "labels" or "some/subfolder/annotations")
             relative_path = os.path.relpath(full_path, dir_path)
             try:
                 with open(full_path, "r", encoding="utf-8") as f:
                     raw_content = f.read()
                 parsed_content = parse_downward_file(relative_path, raw_content)
-                k8s_info[relative_path] = parsed_content
+                k8s_info[base_name] = parsed_content
             except Exception as e:
                 logger.error(
                     error_message,
