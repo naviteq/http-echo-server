@@ -1,0 +1,11 @@
+---
+ingress:
+  hosts:
+    - host: &host demo.sandbox.naviteq.io
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: letsencrypt
+      hosts:
+      - *host
