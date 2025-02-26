@@ -1,11 +1,28 @@
 ---
-ingress:
-  hosts:
-    - host: &host demo.sandbox.naviteq.io
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls:
-    - secretName: letsencrypt
-      hosts:
-      - *host
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: echo-server-dev
+  namespace: argo
+spec:
+  destination:
+    namespace: echo-server
+    name: dev
+  project: default
+  sources:
+    - repoURL: https://public-helm-charts.naviteq.io/
+      chart: http-echo-server
+      targetRevision: 0.1.0
+      helm:
+        valueFiles:
+        - $values/deployment/values/sandbox.yaml
+        - $values/deployment/values/dev.yaml
+    - repoURL: https://github.com/naviteq/http-echo-server
+      ref: values
+      targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
