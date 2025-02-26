@@ -2,12 +2,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: echo-server-dev
+  name: echo-server-production
   namespace: argo
 spec:
   destination:
     namespace: echo-server
-    name: dev
+    name: production
   project: default
   sources:
     - repoURL: https://public-helm-charts.naviteq.io/
@@ -16,7 +16,7 @@ spec:
       helm:
         valueFiles:
         - $values/deployment/values/sandbox.yaml
-        - $values/deployment/values/dev.yaml
+        - $values/deployment/values/prod.yaml
     - repoURL: https://github.com/naviteq/http-echo-server
       ref: values
       targetRevision: main

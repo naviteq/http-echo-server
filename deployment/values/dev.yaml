@@ -1,7 +1,7 @@
 ---
 ingress:
   hosts:
-    - host: &host demo.sandbox.naviteq.io
+    - host: &host dev-demo.sandbox.naviteq.io
       paths:
         - path: /
           pathType: ImplementationSpecific
