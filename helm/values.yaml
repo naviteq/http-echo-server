@@ -78,8 +78,63 @@ env:
 
 volumes:
   - name: downward
-    downwardAPI: {}
-
+    downwardAPI:
+      items:
+        - path: name
+          fieldRef:
+            fieldPath: metadata.name
+        - path: namespace
+          fieldRef:
+            fieldPath: metadata.namespace
+        - path: uid
+          fieldRef:
+            fieldPath: metadata.uid
+        - path: annotations
+          fieldRef:
+            fieldPath: metadata.annotations
+        - path: labels
+          fieldRef:
+            fieldPath: metadata.labels
+        - path: "limits.cpu.m"
+          resourceFieldRef:
+            containerName: primary
+            resource: limits.cpu
+            divisor: 1m
+        - path: "requests.cpu.m"
+          resourceFieldRef:
+            containerName: primary
+            resource: requests.cpu
+            divisor: 1m
+        - path: "limits.memory.Mi"
+          resourceFieldRef:
+            containerName: primary
+            resource: limits.memory
+            divisor: 1Mi
+        - path: "requests.memory.Mi"
+          resourceFieldRef:
+            containerName: primary
+            resource: requests.memory
+            divisor: 1Mi
+        - path: "limits.hugepages-*.Gi"
+          resourceFieldRef:
+            containerName: primary
+            resource: "limits.hugepages-*"
+            divisor: 1Gi
+        - path: "requests.hugepages-*.Gi"
+          resourceFieldRef:
+            containerName: primary
+            resource: "requests.hugepages-*"
+            divisor: 1Gi
+        - path: "limits.ephemeral-storage.Gi"
+          resourceFieldRef:
+            containerName: primary
+            resource: limits.ephemeral-storage
+            divisor: 1Gi
+        - path: "requests.ephemeral-storage.Gi"
+          resourceFieldRef:
+            containerName: primary
+            resource: requests.ephemeral-storage
+            divisor: 1Gi
 volumeMounts:
   - name: downward
     mountPath: /etc/k8s
