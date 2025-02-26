@@ -9,4 +9,5 @@ ingress:
     - secretName: letsencrypt
       hosts:
       - *host
-replicaCount: 1
+autoscaling:
+  minReplicas: 2
