@@ -1,0 +1,45 @@
+---
+
+name: Pull request code validation and building (Main branch)
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+    branches:
+      - main
+
+jobs:
+  format:
+    name: Check formatting
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+      - name: Python format
+        uses: psf/black@stable
+        with:
+          version: 23.1.0
+
+  docker:
+    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@main
+    needs: [format]
+    with:
+      REGISTRY: ghcr.io
+      DOCKER_CONTEXT: app
+      IMAGE: ${{ github.repository }}
+      USERNAME: ${{ github.actor }}
+    secrets:
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  helm:
+    uses: naviteq/github-actions/.github/workflows/helm-release.yaml@main
+    needs: [docker]
+    with:
+      CHART_LOCATION: helm
+    secrets:
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
