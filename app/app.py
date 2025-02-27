@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import requests
 from flask import Flask, request, jsonify
 
 
@@ -29,6 +30,44 @@ handler = logging.StreamHandler()
 handler.setFormatter(JSONFormatter())
 logger.addHandler(handler)
 app = Flask(__name__)
+
+
+def get_geo_info(ip_address):
+    """
+    Call a 3rd party geo IP API (e.g., ip-api.com) to retrieve IP location info.
+    Returns a dict with geo details or an empty dict on error.
+    """
+    if not ip_address:
+        return {}
+    try:
+        # ip-api.com example endpoint (free tier).
+        # 'fields' can specify which data points you want; 66846719 = "all fields"
+        # as per their docs. Adjust as needed:
+        url = f"http://ip-api.com/json/{ip_address}?fields=66846719"
+        response = requests.get(url, timeout=2)  # short timeout for example
+        if response.status_code == 200:
+            data = response.json()
+            # ip-api.com might have 'success' or 'fail' status in JSON
+            if data.get("status") == "success":
+                return data
+            else:
+                logger.warning(
+                    f"Geo API returned a fail status for IP {ip_address}",
+                    extra={"extra_fields": {"ip": ip_address, "api_response": data}},
+                )
+                return {}
+        else:
+            logger.error(
+                f"Geo API returned status code {response.status_code}",
+                extra={"extra_fields": {"ip": ip_address}},
+            )
+            return {}
+    except requests.RequestException as e:
+        logger.error(
+            "Exception while calling geo API. Critical error - exiting",
+            extra={"extra_fields": {"ip": ip_address, "error": str(e)}},
+        )
+        raise e
 
 
 def parse_downward_file(filename, content):
@@ -112,9 +151,20 @@ def info():
     query_params = request.args.to_dict()
     json_body = request.get_json(force=True, silent=True) or {}
     form_data = request.form.to_dict()
+    x_forwarded_for = headers.get("X-Forwarded-For", "")
+    forwarded_ip = ""
+    if x_forwarded_for:
+        # X-Forwarded-For can be multiple IPs, "client, proxy1, proxy2..."
+        # Usually the first is the real client
+        forwarded_ip = x_forwarded_for.split(",")[0].strip()
+    geo_info = {}
+    if forwarded_ip:
+        geo_info = get_geo_info(forwarded_ip)
     k8s_data = read_k8s_directory(os.getenv("DOWNWARD_PATH", "/etc/k8s"))
     response_data = {
-        "client_ip": client_ip,
+        "server_ip": client_ip,
+        "original_ip": forwarded_ip,
+        "geo_info": geo_info,
         "method": method,
         "headers": headers,
         "query_params": query_params,
