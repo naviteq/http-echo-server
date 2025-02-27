@@ -12,7 +12,7 @@ spec:
   sources:
     - repoURL: https://public-helm-charts.naviteq.io/
       chart: http-echo-server
-      targetRevision: 0.1.0
+      targetRevision: "~> 0"
       helm:
         valueFiles:
         - $values/deployment/values/sandbox.yaml
