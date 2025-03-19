@@ -2,8 +2,10 @@
 
 name: CI (Main branch)
 on:
+  workflow_dispatch:
   push:
     branches: [main]
+
 jobs:
   docker:
     uses: naviteq/github-actions/.github/workflows/docker-build.yaml@main
