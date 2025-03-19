@@ -26,7 +26,7 @@ jobs:
           version: 23.1.0
 
   docker:
-    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@main
+    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@feature/add-multi-arch-build
     needs: [format]
     with:
       REGISTRY: ghcr.io
