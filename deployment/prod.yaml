@@ -10,8 +10,8 @@ spec:
     name: production
   project: default
   sources:
-    - repoURL: https://public-helm-charts.naviteq.io/
-      chart: http-echo-server
+    - repoURL: oci://ghcr.io/naviteq/http-echo-server/http-echo-server
+      path: .
       targetRevision: "~> 0"
       helm:
         valueFiles:
