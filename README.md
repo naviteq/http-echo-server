@@ -85,7 +85,7 @@ Helm values (see `helm/values.yaml`): replica count, image, resources, ingress, 
 ## Development
 
 - **Lint / hooks:** `.pre-commit-config.yaml`
-- **CI:** GitHub Actions build the Docker image and publish the Helm chart (see `.github/workflows/`). Releases are created on version tags (`v*.*.*`).
+- **CI:** GitHub Actions build the Docker image and publish the Helm chart (see `.github/workflows/`). Releases are created on version tags (`v*.*.*`). Actions are pinned by 40-char commit SHA; updates are managed by Renovate (see `renovate.json`).
 
 ## License
 
