@@ -1,50 +1,75 @@
 ---
-replicaCount: 1
+# Values for http-echo-server.
+# This chart consumes naviteq-library-chart as a dependency and reduces its own
+# templates to a single thin wrapper that includes `library.app`. Library
+# defaults are imported via `import-values: [defaults]` in Chart.yaml — only
+# override below what differs from the library's defaults.
+#
+# For the full set of available values, see:
+#   https://github.com/naviteq/helm-library/blob/main/chart/README.md
+
+## @section Image
+
 image:
-  repository: ghcr.io/naviteq/http-echo-server
+  registry: ghcr.io
+  repository: naviteq/http-echo-server
   pullPolicy: IfNotPresent
+  ## Defaults to .Chart.AppVersion when empty
   tag: ""
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
-serviceAccount:
-  create: false
-  annotations: {}
-  name: ""
+## @section Container ports
+##
+## The library default is containerPort 8080; the app listens on 5000.
 
-podAnnotations: {}
-podLabels: {}
-podSecurityContext: {}
-  # fsGroup: 2000
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+ports:
+  - name: http
+    containerPort: 5000
+    protocol: TCP
+
+## @section Probes
+##
+## Library defaults disable probes (`enabled: false`). The pre-migration chart
+## ran HTTP probes against / on the http port, so we re-enable them with the
+## same shape here.
+
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
+
+## @section Service
+
 service:
   type: ClusterIP
-  port: 5000
+  ports:
+    - name: http
+      protocol: TCP
+      port: 5000
+      targetPort: http
+
+## @section Ingress
+##
+## Library uses `hostname` + `path` for the primary host, with `extraHosts[]`
+## and `extraTls[]` available for multi-host. The pre-migration chart had a
+## single example host disabled by default — we keep that shape.
 
 ingress:
   enabled: false
-  className: ""
+  hostname: chart-example.local
+  path: /
+  pathType: ImplementationSpecific
+  ingressClassName: ""
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  labels: {}
-  hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls: false
+
+## @section Resources
 
 resources:
   requests:
@@ -53,31 +78,52 @@ resources:
   limits:
     memory: 128Mi
 
-# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-livenessProbe:
-  httpGet:
-    path: /
-    port: http
-readinessProbe:
-  httpGet:
-    path: /
-    port: http
+## @section Autoscaling
+##
+## Note the renamed targets:
+##   targetCPUUtilizationPercentage -> targetCPU
+##   targetMemoryUtilizationPercentage -> targetMemory
 
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 3
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  targetCPU: 80
+  targetMemory: 80
 
-env:
-  - name: DOWNWARD_PATH
-    value: /etc/k8s
-  - name: SERVER_PORT
-    value: "5000"
+## @section PodDisruptionBudget (disabled)
+##
+## Library default is `pdb.create: true`. The pre-migration chart did not
+## render a PDB, so we suppress it here to keep the helm template diff
+## minimal. Enabling a PDB can be a follow-up change.
 
-volumes:
+pdb:
+  create: false
+
+## @section ServiceAccount
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+## @section Environment variables
+##
+## Library uses a map (key -> value), not the K8s list-of-{name,value} form
+## used in the pre-migration chart.
+
+envVars:
+  DOWNWARD_PATH: "/etc/k8s"
+  SERVER_PORT: "5000"
+
+## @section Downward API volume
+##
+## Library renames `volumes` / `volumeMounts` to `extraVolumes` /
+## `extraVolumeMounts`. Resource-field references must target the library's
+## container name (= .Chart.Name = "http-echo-server"), not the old "primary"
+## name used by the pre-migration deployment template.
+
+extraVolumes:
   - name: downward
     downwardAPI:
       items:
@@ -98,51 +144,71 @@ volumes:
             fieldPath: metadata.labels
         - path: "limits.cpu.m"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: limits.cpu
             divisor: 1m
         - path: "requests.cpu.m"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: requests.cpu
             divisor: 1m
         - path: "limits.memory.Mi"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: limits.memory
             divisor: 1Mi
         - path: "requests.memory.Mi"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: requests.memory
             divisor: 1Mi
         - path: "limits.hugepages-*.Gi"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: "limits.hugepages-*"
             divisor: 1Gi
         - path: "requests.hugepages-*.Gi"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: "requests.hugepages-*"
             divisor: 1Gi
         - path: "limits.ephemeral-storage.Gi"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: limits.ephemeral-storage
             divisor: 1Gi
         - path: "requests.ephemeral-storage.Gi"
           resourceFieldRef:
-            containerName: primary
+            containerName: http-echo-server
             resource: requests.ephemeral-storage
             divisor: 1Gi
-volumeMounts:
+
+extraVolumeMounts:
   - name: downward
     mountPath: /etc/k8s
     readOnly: true
 
+## @section Security contexts
+##
+## Pod-level: library wraps this with an `enabled` toggle (default off).
+## Container-level: renamed from `securityContext` to `containerSecurityContext`.
+
+podSecurityContext:
+  enabled: false
+  # fsGroup: 2000
+
+containerSecurityContext:
+  enabled: false
+  # runAsUser: 1000
+  # runAsNonRoot: true
+
+## @section Pod labels and annotations
+
+podAnnotations: {}
+podLabels: {}
+
+## @section Scheduling
+
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}

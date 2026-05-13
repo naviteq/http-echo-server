@@ -73,7 +73,7 @@ helm install echo-server oci://ghcr.io/naviteq/http-echo-server/http-echo-server
 | `SERVER_PORT`        | HTTP port                      | `5000`      |
 | `DOWNWARD_PATH`      | Path to Downward API files     | `/etc/k8s`  |
 
-Helm values (see `helm/values.yaml`): replica count, image, resources, ingress, autoscaling (HPA), and Downward API volume mounts.
+Helm values (see `helm/values.yaml`): this chart consumes [`naviteq/helm-library`](https://github.com/naviteq/helm-library) via `import-values: [defaults]`, so the values file only overrides what differs from the library's defaults. Notable overrides for this chart: `image`, `ports` (containerPort `5000`), `service.ports`, `ingress.hostname`, `resources`, `autoscaling.{targetCPU,targetMemory}`, `envVars` (map, not list), and the Downward API `extraVolumes` / `extraVolumeMounts`. For the full set of values the library exposes, see [the library chart README](https://github.com/naviteq/helm-library/blob/main/chart/README.md).
 
 ## API
 
