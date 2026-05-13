@@ -16,17 +16,17 @@ jobs:
     name: Check formatting
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: '3.11'
       - name: Python format
-        uses: psf/black@stable
+        uses: psf/black@c6755bb741b6481d6b3d3bb563c83fa060db96c9  # 26.3.1
         with:
           version: 23.1.0
 
   docker:
-    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@main
+    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@5b8826cfc79c3a060cec9b2406886a248ee23fef  # v1.20.9
     needs: [format]
     with:
       REGISTRY: ghcr.io
@@ -38,7 +38,7 @@ jobs:
       TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
-    uses: naviteq/github-actions/.github/workflows/helm-release-github.yaml@main
+    uses: naviteq/github-actions/.github/workflows/helm-release-github.yaml@5b8826cfc79c3a060cec9b2406886a248ee23fef  # v1.20.9
     needs: [docker]
     with:
       chart_path: helm
