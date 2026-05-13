@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "enabledManagers": [
+    "github-actions",
+    "dockerfile",
+    "helmv3"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions updates"
+    },
+    {
+      "matchManagers": ["dockerfile"],
+      "groupName": "dockerfile base image updates"
+    },
+    {
+      "matchManagers": ["helmv3"],
+      "groupName": "helm chart updates"
+    }
+  ]
+}
