@@ -2,8 +2,8 @@ apiVersion: v2
 name: http-echo-server
 description: Naviteq simple HTTP request echo server
 type: application
-version: 0.6.1
-appVersion: v0.6.1
+version: 0.7.0
+appVersion: v0.7.0
 dependencies:
   - name: naviteq-library-chart
     version: 0.0.3
