@@ -172,3 +172,7 @@ cython_debug/
 
 # Idea
 .idea
+
+# Helm dependency artifacts — downloaded by `helm dependency update`.
+# Chart.lock is committed, charts/ is not.
+helm/charts/
