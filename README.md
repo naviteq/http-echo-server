@@ -16,30 +16,9 @@ A simple HTTP server that echoes request details and exposes Kubernetes Downward
 - **Kubernetes Downward API** — Exposes pod metadata (name, namespace, labels, annotations, resource limits/requests) when run in Kubernetes
 - **JSON logging** — Structured JSON logs to stdout
 
-## Demo
+## What to expect
 
-Run the chart in a cluster, port-forward the service, and hit it with a request that includes an `X-Forwarded-For` header and a few query params:
-
-> [!NOTE]
-> The example below uses `helm install http-echo-server ./helm -n echo-test` (release name = chart name, in a custom namespace). Adjust the namespace and service name to match your own install.
-
-```bash
-kubectl port-forward -n echo-test svc/http-echo-server 5000:5000
-
-curl -s -H 'X-Forwarded-For: 8.8.8.8' -H 'X-Request-Id: demo-123' \
-  'http://localhost:5000/?user=demo&env=test' \
-  | jq '{
-      ip: .original_ip,
-      location: (.geo_info.city + ", " + .geo_info.country),
-      isp: .geo_info.isp,
-      headers: .headers,
-      query: .query_params,
-      pod: .kubernetes.name,
-      namespace: .kubernetes.namespace,
-      cpu_limit_m: .kubernetes."limits.cpu.m",
-      memory_limit_Mi: .kubernetes."limits.memory.Mi"
-    }'
-```
+Once deployed, any HTTP request to the echo server comes back as a JSON dump describing the request, the caller, and the pod that handled it. A typical response looks like this (abbreviated for clarity):
 
 ![demo output](docs/screenshots/demo.png)
 
