@@ -8,7 +8,7 @@ on:
 
 jobs:
   docker:
-    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@d52d99a6b6a2365becfefdabe12930a5b868e606 # test/main, github-workflows 4052ee1
+    uses: naviteq/github-actions/.github/workflows/docker-build.yaml@671d8054bbdf6b3636fdb411f6acbbf580bb8e6c # test/main, github-workflows 4052ee1
     with:
       REGISTRY: ghcr.io
       DOCKER_CONTEXT: app
@@ -19,7 +19,7 @@ jobs:
       TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
-    uses: naviteq/github-actions/.github/workflows/helm-release-github.yaml@d52d99a6b6a2365becfefdabe12930a5b868e606 # test/main, github-workflows 4052ee1
+    uses: naviteq/github-actions/.github/workflows/helm-release-github.yaml@671d8054bbdf6b3636fdb411f6acbbf580bb8e6c # test/main, github-workflows 4052ee1
     needs: [docker]
     with:
       chart_path: helm
@@ -31,7 +31,7 @@ jobs:
       token: ${{ secrets.GITHUB_TOKEN }}
 
   release:
-    uses: naviteq/github-actions/.github/workflows/create-release.yaml@d52d99a6b6a2365becfefdabe12930a5b868e606 # test/main, github-workflows 4052ee1
+    uses: naviteq/github-actions/.github/workflows/create-release.yaml@671d8054bbdf6b3636fdb411f6acbbf580bb8e6c # test/main, github-workflows 4052ee1
     needs:
       - docker
       - helm
